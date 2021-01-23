@@ -1,12 +1,17 @@
 package repositories
 
-import "testing"
+import (
+	"context"
+	"testing"
+)
 
 func TestSagaRepository_Save(t *testing.T) {
 	t.Run(`positive`, func(t *testing.T) {
+		ctx := context.Background()
+
 		sut := NewSagaRepository()
 
-		err := sut.Save(nil)
+		err := sut.Save(ctx, nil)
 		if err != nil {
 			t.Errorf(`unexpected error %s`, err)
 		}

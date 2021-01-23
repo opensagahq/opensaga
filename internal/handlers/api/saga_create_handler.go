@@ -1,6 +1,7 @@
 package api
 
 import (
+	"context"
 	"encoding/json"
 	"net/http"
 
@@ -9,6 +10,8 @@ import (
 )
 
 func (h *sagaCreateHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
+	ctx := r.Context()
+
 	var sagaDTO dto.SagaCreateDTO
 
 	err := json.NewDecoder(r.Body).Decode(&sagaDTO)
@@ -26,7 +29,7 @@ func (h *sagaCreateHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		ID:   sagaDTO.ID,
 		Name: sagaDTO.Name,
 	}
-	_ = h.sagaRepository.Save(saga)
+	_ = h.sagaRepository.Save(ctx, saga)
 
 	for _, sagaStepDTO := range sagaDTO.StepList {
 		sagaStep := &entities.SagaStep{
@@ -39,7 +42,7 @@ func (h *sagaCreateHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 			Endpoint:      sagaStepDTO.Endpoint,
 		}
 
-		_ = h.sagaStepRepository.Save(sagaStep)
+		_ = h.sagaStepRepository.Save(ctx, sagaStep)
 	}
 
 	w.WriteHeader(http.StatusOK)
@@ -65,9 +68,9 @@ type sagaCreateHandler struct {
 }
 
 type SagaRepository interface {
-	Save(saga *entities.Saga) error
+	Save(ctx context.Context, saga *entities.Saga) error
 }
 
 type SagaStepRepository interface {
-	Save(sagaStep *entities.SagaStep) error
+	Save(ctx context.Context, sagaStep *entities.SagaStep) error
 }

@@ -1,8 +1,11 @@
 package repositories
 
-import "opensaga/internal/entities"
+import (
+	"context"
+	"opensaga/internal/entities"
+)
 
-func (r *sagaStepRepository) Save(sagaStep *entities.SagaStep) error {
+func (r *sagaStepRepository) Save(ctx context.Context, sagaStep *entities.SagaStep) error {
 	return nil
 }
 
