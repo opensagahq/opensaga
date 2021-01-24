@@ -1,0 +1,7 @@
+POST {{host}}/api/saga-call-create
+Content-Type: application/json
+
+{
+    "idempotency_key": "568521fd-0b7f-4024-ac4f-3e686e3f19e9",
+    "saga": "saga 1"
+}

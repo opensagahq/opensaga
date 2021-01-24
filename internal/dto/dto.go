@@ -14,3 +14,9 @@ type SagaCreateSagaStepDTO struct {
 	Name          string  `json:"name"`
 	Endpoint      string  `json:"endpoint"`
 }
+
+type SagaCallCreateDTO struct {
+	IdempotencyKey string `json:"idempotency_key"`
+	Saga           string `json:"saga"`
+	// todo add fields
+}

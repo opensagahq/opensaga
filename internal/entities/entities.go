@@ -24,3 +24,9 @@ type SagaStep struct {
 	// Endpoint holds an address of service should be called.
 	Endpoint string `json:"endpoint"`
 }
+
+type SagaCall struct {
+	IdempotencyKey string `json:"idempotency_key"`
+	SagaID         string `json:"saga_id"`
+	// todo add fields
+}
