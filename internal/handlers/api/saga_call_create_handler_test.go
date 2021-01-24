@@ -5,11 +5,15 @@ import (
 	"net/http"
 	"net/http/httptest"
 	"testing"
+
+	"opensaga/internal/repositories"
 )
 
 func TestSagaCallCreateHandler_ServeHTTP(t *testing.T) {
 	t.Run(`positive`, func(t *testing.T) {
-		sut := NewSagaCallCreateHandler()
+		sut := NewSagaCallCreateHandler(SagaCallCreateHandlerCfg{
+			SagaCallRepository: repositories.NewSagaCallRepository(),
+		})
 		req, _ := http.NewRequest(http.MethodPost, `/api/saga-call-create`, bytes.NewBufferString(sagaCallCreateBody))
 
 		rr := httptest.NewRecorder()
@@ -22,7 +26,9 @@ func TestSagaCallCreateHandler_ServeHTTP(t *testing.T) {
 	})
 
 	t.Run(`invalid json input`, func(t *testing.T) {
-		sut := NewSagaCallCreateHandler()
+		sut := NewSagaCallCreateHandler(SagaCallCreateHandlerCfg{
+			SagaCallRepository: repositories.NewSagaCallRepository(),
+		})
 		req, _ := http.NewRequest(http.MethodPost, `/api/saga-call-create`, bytes.NewBufferString(`invalid json`))
 
 		rr := httptest.NewRecorder()
