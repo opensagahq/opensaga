@@ -28,5 +28,5 @@ type SagaStep struct {
 type SagaCall struct {
 	IdempotencyKey string `json:"idempotency_key"`
 	SagaID         string `json:"saga_id"`
-	// todo add fields
+	Content        string `json:"content"`
 }

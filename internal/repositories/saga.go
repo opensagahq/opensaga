@@ -1,13 +1,11 @@
 package repositories
 
 import (
-	"context"
-
 	"opensaga/internal/entities"
 )
 
-func (r *sagaRepository) Save(ctx context.Context, saga *entities.Saga) error {
-	return nil
+func (r *sagaRepository) SaveStmt(saga *entities.Saga) *Stmt {
+	return NewStmt(`insert into "opensaga"."saga" ("id", "name") values ($1, $2)`, saga.ID, saga.Name)
 }
 
 func NewSagaRepository() *sagaRepository {

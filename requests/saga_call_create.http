@@ -3,5 +3,36 @@ Content-Type: application/json
 
 {
     "idempotency_key": "568521fd-0b7f-4024-ac4f-3e686e3f19e9",
-    "saga": "saga 1"
+    "saga": "saga 1",
+    "step_list": {
+        "withdraw": {
+            "payload": {
+                "person_id": 1234,
+                "amount": 100,
+                "currency": "USD"
+            }
+        },
+        "enable paid feature": {
+            "payload": {
+                "person_id": 1234,
+                "paid_feature_id": 5678
+            }
+        },
+        "notify": {
+            "payload": {
+                "person_id": 1234,
+                "notification": {
+                    "title": "Paid feature enabled!",
+                    "text": "You have successfully enable paid feature! Thank you!"
+                }
+            }
+        },
+        "refund": {
+            "payload": {
+                "person_id": 1234,
+                "amount": 100,
+                "currency": "USD"
+            }
+        }
+    }
 }

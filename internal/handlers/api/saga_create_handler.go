@@ -1,12 +1,13 @@
 package api
 
 import (
-	"context"
 	"encoding/json"
+	"fmt"
 	"net/http"
 
 	"opensaga/internal/dto"
 	"opensaga/internal/entities"
+	"opensaga/internal/repositories"
 )
 
 func (h *sagaCreateHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
@@ -24,14 +25,15 @@ func (h *sagaCreateHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// todo extract into SagaPersister
-	// todo tx
+	stmts := make([]*repositories.Stmt, 1+len(sagaDTO.StepList))
+
 	saga := &entities.Saga{
 		ID:   sagaDTO.ID,
 		Name: sagaDTO.Name,
 	}
-	_ = h.sagaRepository.Save(ctx, saga)
+	stmts[0] = h.sagaRepository.SaveStmt(saga)
 
-	for _, sagaStepDTO := range sagaDTO.StepList {
+	for i, sagaStepDTO := range sagaDTO.StepList {
 		sagaStep := &entities.SagaStep{
 			ID:            sagaStepDTO.ID,
 			SagaID:        sagaDTO.ID,
@@ -42,7 +44,16 @@ func (h *sagaCreateHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 			Endpoint:      sagaStepDTO.Endpoint,
 		}
 
-		_ = h.sagaStepRepository.Save(ctx, sagaStep)
+		stmts[i+1] = h.sagaStepRepository.SaveStmt(sagaStep)
+	}
+
+	err = h.coordinator.Transactional(ctx, stmts...)
+	if err != nil {
+		w.WriteHeader(http.StatusBadRequest)
+		w.Header().Set("Content-Type", "application/json")
+		_, _ = w.Write([]byte(fmt.Sprintf(`{"status": "failed", "error": "%s"}`, err)))
+
+		return
 	}
 
 	w.WriteHeader(http.StatusOK)
@@ -54,23 +65,18 @@ func NewSagaCreateHandler(cfg SagaCreateHandlerCfg) *sagaCreateHandler {
 	return &sagaCreateHandler{
 		sagaRepository:     cfg.SagaRepository,
 		sagaStepRepository: cfg.SagaStepRepository,
+		coordinator:        cfg.Coordinator,
 	}
 }
 
 type SagaCreateHandlerCfg struct {
 	SagaRepository     SagaRepository
 	SagaStepRepository SagaStepRepository
+	Coordinator        Coordinator
 }
 
 type sagaCreateHandler struct {
 	sagaRepository     SagaRepository
 	sagaStepRepository SagaStepRepository
-}
-
-type SagaRepository interface {
-	Save(ctx context.Context, saga *entities.Saga) error
-}
-
-type SagaStepRepository interface {
-	Save(ctx context.Context, sagaStep *entities.SagaStep) error
+	coordinator        Coordinator
 }

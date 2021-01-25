@@ -11,7 +11,7 @@ func TestSagaRepository_Save(t *testing.T) {
 
 		sut := NewSagaRepository()
 
-		err := sut.Save(ctx, nil)
+		err := sut.SaveStmt(ctx, nil)
 		if err != nil {
 			t.Errorf(`unexpected error %s`, err)
 		}
