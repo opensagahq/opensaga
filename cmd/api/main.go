@@ -1,31 +1,16 @@
 package main
 
 import (
-	"context"
-	"log"
 	"net/http"
-	"os"
 
-	"github.com/jackc/pgx/v4/pgxpool"
-
+	"opensaga/internal/database"
 	"opensaga/internal/handlers/api"
 	"opensaga/internal/handlers/healthz"
 	"opensaga/internal/repositories"
 )
 
 func main() {
-	ctx := context.Background()
-
-	poolConfig, err := pgxpool.ParseConfig(os.Getenv("DATABASE_URL"))
-	if err != nil {
-		log.Fatalf("unable to parse DATABASE_URL: %v", err)
-	}
-	poolConfig.ConnConfig.PreferSimpleProtocol = true
-
-	db, err := pgxpool.ConnectConfig(ctx, poolConfig)
-	if err != nil {
-		log.Fatalf("Unable to connect to database: %v\n", err)
-	}
+	db := database.Open()
 
 	coordinator := repositories.NewCoordinator(repositories.CoordinatorCfg{Conn: db})
 	sagaRepository := repositories.NewSagaRepository()

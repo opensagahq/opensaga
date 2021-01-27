@@ -2,25 +2,24 @@ package repositories
 
 import (
 	"context"
-
-	"github.com/jackc/pgx/v4/pgxpool"
+	"database/sql"
 )
 
 func (c *coordinator) Transactional(ctx context.Context, stmts ...*Stmt) (err error) {
-	tx, err := c.conn.Begin(ctx)
+	tx, err := c.conn.BeginTx(ctx, nil)
 	if err != nil {
 		return err
 	}
 	defer func() {
 		if err == nil {
-			_ = tx.Commit(ctx)
+			_ = tx.Commit()
 		} else {
-			_ = tx.Rollback(ctx)
+			_ = tx.Rollback()
 		}
 	}()
 
 	for _, stmt := range stmts {
-		_, err := tx.Exec(ctx, stmt.Query(), stmt.Args()...)
+		_, err := tx.ExecContext(ctx, stmt.Query(), stmt.Args()...)
 		if err != nil {
 			return err
 		}
@@ -36,9 +35,9 @@ func NewCoordinator(cfg CoordinatorCfg) *coordinator {
 }
 
 type CoordinatorCfg struct {
-	Conn *pgxpool.Pool
+	Conn *sql.DB
 }
 
 type coordinator struct {
-	conn *pgxpool.Pool
+	conn *sql.DB
 }
