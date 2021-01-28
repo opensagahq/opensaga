@@ -14,6 +14,7 @@ func TestSagaCreateHandler_ServeHTTP(t *testing.T) {
 		sut := NewSagaCreateHandler(SagaCreateHandlerCfg{
 			SagaRepository:     repositories.NewSagaRepository(),
 			SagaStepRepository: repositories.NewSagaStepRepository(),
+			Coordinator:        NewCoordinatorMock(),
 		})
 		req, _ := http.NewRequest(http.MethodPost, `/api/saga-create`, bytes.NewBufferString(body))
 
@@ -30,6 +31,7 @@ func TestSagaCreateHandler_ServeHTTP(t *testing.T) {
 		sut := NewSagaCreateHandler(SagaCreateHandlerCfg{
 			SagaRepository:     repositories.NewSagaRepository(),
 			SagaStepRepository: repositories.NewSagaStepRepository(),
+			Coordinator:        NewCoordinatorMock(),
 		})
 		req, _ := http.NewRequest(http.MethodPost, `/api/saga-create`, bytes.NewBufferString(`invalid json`))
 

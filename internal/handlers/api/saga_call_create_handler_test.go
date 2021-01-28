@@ -13,6 +13,7 @@ func TestSagaCallCreateHandler_ServeHTTP(t *testing.T) {
 	t.Run(`positive`, func(t *testing.T) {
 		sut := NewSagaCallCreateHandler(SagaCallCreateHandlerCfg{
 			SagaCallRepository: repositories.NewSagaCallRepository(),
+			Coordinator:        NewCoordinatorMock(),
 		})
 		req, _ := http.NewRequest(http.MethodPost, `/api/saga-call-create`, bytes.NewBufferString(sagaCallCreateBody))
 
@@ -28,6 +29,7 @@ func TestSagaCallCreateHandler_ServeHTTP(t *testing.T) {
 	t.Run(`invalid json input`, func(t *testing.T) {
 		sut := NewSagaCallCreateHandler(SagaCallCreateHandlerCfg{
 			SagaCallRepository: repositories.NewSagaCallRepository(),
+			Coordinator:        NewCoordinatorMock(),
 		})
 		req, _ := http.NewRequest(http.MethodPost, `/api/saga-call-create`, bytes.NewBufferString(`invalid json`))
 
