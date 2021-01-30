@@ -3,22 +3,13 @@ package api
 import (
 	"context"
 
-	"opensaga/internal/entities"
-	"opensaga/internal/repositories"
+	"opensaga/internal/dto"
 )
 
-type SagaRepository interface {
-	SaveStmt(saga *entities.Saga) *repositories.Stmt
+type SagaPersistingService interface {
+	Persist(context.Context, *dto.SagaCreateDTO) (err error)
 }
 
-type SagaStepRepository interface {
-	SaveStmt(sagaStep *entities.SagaStep) *repositories.Stmt
-}
-
-type SagaCallRepository interface {
-	SaveStmt(sagaCall *entities.SagaCall) *repositories.Stmt
-}
-
-type Coordinator interface {
-	Transactional(ctx context.Context, stmts ...*repositories.Stmt) (err error)
+type SagaCallPersistingService interface {
+	Persist(context.Context, *dto.SagaCallCreateDTO) (err error)
 }

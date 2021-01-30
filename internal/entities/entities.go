@@ -1,5 +1,12 @@
 package entities
 
+func NewSaga(ID, name string) *Saga {
+	return &Saga{
+		ID:   ID,
+		Name: name,
+	}
+}
+
 type Saga struct {
 	// todo replace with uuid
 	ID   string `json:"id"`
@@ -23,6 +30,14 @@ type SagaStep struct {
 
 	// Endpoint holds an address of service should be called.
 	Endpoint string `json:"endpoint"`
+}
+
+func NewSagaCall(idempotencyKey, sagaID, content string) *SagaCall {
+	return &SagaCall{
+		IdempotencyKey: idempotencyKey,
+		SagaID:         sagaID,
+		Content:        content,
+	}
 }
 
 type SagaCall struct {

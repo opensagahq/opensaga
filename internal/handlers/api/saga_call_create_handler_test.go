@@ -7,13 +7,17 @@ import (
 	"testing"
 
 	"opensaga/internal/repositories"
+	"opensaga/internal/services"
 )
 
 func TestSagaCallCreateHandler_ServeHTTP(t *testing.T) {
 	t.Run(`positive`, func(t *testing.T) {
+		// todo replace with mock
 		sut := NewSagaCallCreateHandler(SagaCallCreateHandlerCfg{
-			SagaCallRepository: repositories.NewSagaCallRepository(),
-			Coordinator:        NewCoordinatorMock(),
+			SagaCallPersistingService: services.NewSagaCallPersistingService(services.SagaCallPersistingServiceCfg{
+				SagaIDFinder:  repositories.NewSagaRepository(),
+				SagaCallSaver: repositories.NewSagaCallRepository(),
+			}),
 		})
 		req, _ := http.NewRequest(http.MethodPost, `/api/saga-call-create`, bytes.NewBufferString(sagaCallCreateBody))
 
@@ -27,9 +31,12 @@ func TestSagaCallCreateHandler_ServeHTTP(t *testing.T) {
 	})
 
 	t.Run(`invalid json input`, func(t *testing.T) {
+		// todo replace with mock
 		sut := NewSagaCallCreateHandler(SagaCallCreateHandlerCfg{
-			SagaCallRepository: repositories.NewSagaCallRepository(),
-			Coordinator:        NewCoordinatorMock(),
+			SagaCallPersistingService: services.NewSagaCallPersistingService(services.SagaCallPersistingServiceCfg{
+				SagaIDFinder:  repositories.NewSagaRepository(),
+				SagaCallSaver: repositories.NewSagaCallRepository(),
+			}),
 		})
 		req, _ := http.NewRequest(http.MethodPost, `/api/saga-call-create`, bytes.NewBufferString(`invalid json`))
 

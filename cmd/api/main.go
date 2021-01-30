@@ -7,25 +7,33 @@ import (
 	"opensaga/internal/handlers/api"
 	"opensaga/internal/handlers/healthz"
 	"opensaga/internal/repositories"
+	"opensaga/internal/services"
 )
 
 func main() {
 	db := database.Open()
 
-	coordinator := repositories.NewCoordinator(repositories.CoordinatorCfg{Conn: db})
 	sagaRepository := repositories.NewSagaRepository()
 	sagaStepRepository := repositories.NewSagaStepRepository()
 	sagaCallRepository := repositories.NewSagaCallRepository()
 
+	sagaPersistingService := services.NewSagaPersistingService(services.SagaPersistingServiceCfg{
+		SagaSaver:     sagaRepository,
+		SagaStepSaver: sagaStepRepository,
+		DB:            db,
+	})
+	sagaCallPersistingService := services.NewSagaCallPersistingService(services.SagaCallPersistingServiceCfg{
+		SagaIDFinder:  sagaRepository,
+		SagaCallSaver: sagaCallRepository,
+		DB:            db,
+	})
+
 	healthzHandler := healthz.New()
 	sagaCreateHandler := api.NewSagaCreateHandler(api.SagaCreateHandlerCfg{
-		SagaRepository:     sagaRepository,
-		SagaStepRepository: sagaStepRepository,
-		Coordinator:        coordinator,
+		SagaPersistingService: sagaPersistingService,
 	})
 	sagaCallCreateHandler := api.NewSagaCallCreateHandler(api.SagaCallCreateHandlerCfg{
-		SagaCallRepository: sagaCallRepository,
-		Coordinator:        coordinator,
+		SagaCallPersistingService: sagaCallPersistingService,
 	})
 
 	mux := http.NewServeMux()

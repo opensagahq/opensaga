@@ -1,12 +1,12 @@
 package dto
 
 type SagaCreateDTO struct {
-	ID       string                   `json:"id"`
-	Name     string                   `json:"name"`
-	StepList []*SagaCreateSagaStepDTO `json:"step_list"`
+	ID       string               `json:"id"`
+	Name     string               `json:"name"`
+	StepList []*SagaStepCreateDTO `json:"step_list"`
 }
 
-type SagaCreateSagaStepDTO struct {
+type SagaStepCreateDTO struct {
 	ID            string  `json:"id"`
 	NextOnSuccess *string `json:"next_on_success"`
 	NextOnFailure *string `json:"next_on_failure"`
