@@ -2,46 +2,70 @@ package api
 
 import (
 	"bytes"
+	"context"
+	"errors"
 	"net/http"
 	"net/http/httptest"
 	"testing"
 
-	"opensaga/internal/repositories"
+	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/mock"
+
+	mocks "opensaga/internal/mocks/handlers/api"
 )
 
 func TestSagaCreateHandler_ServeHTTP(t *testing.T) {
 	t.Run(`positive`, func(t *testing.T) {
+		sagaPersistingServiceMock := new(mocks.SagaPersistingService)
+		sagaPersistingServiceMock.
+			On(`Persist`, context.Background(), mock.Anything).
+			Return(nil)
+
 		sut := NewSagaCreateHandler(SagaCreateHandlerCfg{
-			SagaRepository:     repositories.NewSagaRepository(),
-			SagaStepRepository: repositories.NewSagaStepRepository(),
-			Coordinator:        NewCoordinatorMock(),
+			SagaPersistingService: sagaPersistingServiceMock,
 		})
+
 		req, _ := http.NewRequest(http.MethodPost, `/api/saga-create`, bytes.NewBufferString(body))
 
 		rr := httptest.NewRecorder()
 		handler := http.HandlerFunc(sut.ServeHTTP)
 		handler.ServeHTTP(rr, req)
 
-		if status := rr.Code; status != http.StatusOK {
-			t.Errorf(`unexpected status code: got "%v", want "%v"`, status, http.StatusOK)
-		}
+		assert.Equal(t, http.StatusOK, rr.Code, `unexpected status code`)
+		mock.AssertExpectationsForObjects(t)
 	})
 
-	t.Run(`invalid json input`, func(t *testing.T) {
+	t.Run(`expected error on persist`, func(t *testing.T) {
+		sagaPersistingServiceMock := new(mocks.SagaPersistingService)
+		sagaPersistingServiceMock.
+			On(`Persist`, context.Background(), mock.Anything).
+			Return(errors.New(`some persisting error`))
+
 		sut := NewSagaCreateHandler(SagaCreateHandlerCfg{
-			SagaRepository:     repositories.NewSagaRepository(),
-			SagaStepRepository: repositories.NewSagaStepRepository(),
-			Coordinator:        NewCoordinatorMock(),
+			SagaPersistingService: sagaPersistingServiceMock,
 		})
+
+		req, _ := http.NewRequest(http.MethodPost, `/api/saga-create`, bytes.NewBufferString(body))
+
+		rr := httptest.NewRecorder()
+		handler := http.HandlerFunc(sut.ServeHTTP)
+		handler.ServeHTTP(rr, req)
+
+		assert.Equal(t, http.StatusBadRequest, rr.Code, `unexpected status code`)
+		mock.AssertExpectationsForObjects(t)
+	})
+
+	t.Run(`invalid input`, func(t *testing.T) {
+		sut := NewSagaCreateHandler(SagaCreateHandlerCfg{
+		})
+
 		req, _ := http.NewRequest(http.MethodPost, `/api/saga-create`, bytes.NewBufferString(`invalid json`))
 
 		rr := httptest.NewRecorder()
 		handler := http.HandlerFunc(sut.ServeHTTP)
 		handler.ServeHTTP(rr, req)
 
-		if status := rr.Code; status != http.StatusBadRequest {
-			t.Errorf(`unexpected status code: got "%v", want "%v"`, status, http.StatusBadRequest)
-		}
+		assert.Equal(t, http.StatusBadRequest, rr.Code, `unexpected status code`)
 	})
 }
 

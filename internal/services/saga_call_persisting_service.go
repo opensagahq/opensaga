@@ -15,11 +15,16 @@ func (svc *sagaCallPersistingService) Persist(ctx context.Context, sc *dto.SagaC
 		if err == nil {
 			_ = tx.Commit()
 		} else {
-			_ = tx.Rollback()
+			if tx != nil {
+				_ = tx.Rollback()
+			}
 		}
 	}()
 
 	tx, err = svc.db.BeginTx(ctx, nil)
+	if err != nil {
+		return
+	}
 
 	var sagaID string
 	stmt := svc.sagaIDFinder.FindIDByNameStmt(sc.Saga)

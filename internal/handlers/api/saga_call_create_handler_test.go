@@ -2,51 +2,72 @@ package api
 
 import (
 	"bytes"
+	"context"
+	"errors"
 	"net/http"
 	"net/http/httptest"
 	"testing"
 
-	"opensaga/internal/repositories"
+	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/mock"
+
+	mocks "opensaga/internal/mocks/handlers/api"
 	"opensaga/internal/services"
 )
 
 func TestSagaCallCreateHandler_ServeHTTP(t *testing.T) {
 	t.Run(`positive`, func(t *testing.T) {
-		// todo replace with mock
+		sagaCallPersistingServiceMock := new(mocks.SagaCallPersistingService)
+		sagaCallPersistingServiceMock.
+			On(`Persist`, context.Background(), mock.Anything).
+			Return(nil)
+
 		sut := NewSagaCallCreateHandler(SagaCallCreateHandlerCfg{
-			SagaCallPersistingService: services.NewSagaCallPersistingService(services.SagaCallPersistingServiceCfg{
-				SagaIDFinder:  repositories.NewSagaRepository(),
-				SagaCallSaver: repositories.NewSagaCallRepository(),
-			}),
+			SagaCallPersistingService: sagaCallPersistingServiceMock,
 		})
+
 		req, _ := http.NewRequest(http.MethodPost, `/api/saga-call-create`, bytes.NewBufferString(sagaCallCreateBody))
 
 		rr := httptest.NewRecorder()
 		handler := http.HandlerFunc(sut.ServeHTTP)
 		handler.ServeHTTP(rr, req)
 
-		if status := rr.Code; status != http.StatusOK {
-			t.Errorf(`unexpected status code: got "%v", want "%v"`, status, http.StatusOK)
-		}
+		assert.Equal(t, http.StatusOK, rr.Code, `unexpected status code`)
+		mock.AssertExpectationsForObjects(t)
 	})
 
-	t.Run(`invalid json input`, func(t *testing.T) {
-		// todo replace with mock
+	t.Run(`expected error on persist`, func(t *testing.T) {
+		sagaCallPersistingServiceMock := new(mocks.SagaCallPersistingService)
+		sagaCallPersistingServiceMock.
+			On(`Persist`, context.Background(), mock.Anything).
+			Return(errors.New(`some persisting error`))
+
 		sut := NewSagaCallCreateHandler(SagaCallCreateHandlerCfg{
-			SagaCallPersistingService: services.NewSagaCallPersistingService(services.SagaCallPersistingServiceCfg{
-				SagaIDFinder:  repositories.NewSagaRepository(),
-				SagaCallSaver: repositories.NewSagaCallRepository(),
-			}),
+			SagaCallPersistingService: sagaCallPersistingServiceMock,
 		})
+
+		req, _ := http.NewRequest(http.MethodPost, `/api/saga-call-create`, bytes.NewBufferString(sagaCallCreateBody))
+
+		rr := httptest.NewRecorder()
+		handler := http.HandlerFunc(sut.ServeHTTP)
+		handler.ServeHTTP(rr, req)
+
+		assert.Equal(t, http.StatusBadRequest, rr.Code, `unexpected status code`)
+		mock.AssertExpectationsForObjects(t)
+	})
+
+	t.Run(`invalid input`, func(t *testing.T) {
+		sut := NewSagaCallCreateHandler(SagaCallCreateHandlerCfg{
+			SagaCallPersistingService: services.NewSagaCallPersistingService(services.SagaCallPersistingServiceCfg{}),
+		})
+
 		req, _ := http.NewRequest(http.MethodPost, `/api/saga-call-create`, bytes.NewBufferString(`invalid json`))
 
 		rr := httptest.NewRecorder()
 		handler := http.HandlerFunc(sut.ServeHTTP)
 		handler.ServeHTTP(rr, req)
 
-		if status := rr.Code; status != http.StatusBadRequest {
-			t.Errorf(`unexpected status code: got "%v", want "%v"`, status, http.StatusBadRequest)
-		}
+		assert.Equal(t, http.StatusBadRequest, rr.Code, `unexpected status code`)
 	})
 }
 

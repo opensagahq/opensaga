@@ -10,7 +10,7 @@ func (r *sagaRepository) SaveStmt(saga *entities.Saga) *Stmt {
 
 func (r *sagaRepository) FindIDByNameStmt(name string) *Stmt {
 	// todo index on name?
-	return NewStmt(`select id from "opensaga"."saga" where "name" = $1`, name)
+	return NewStmt(`select "id" from "opensaga"."saga" where "name" = $1`, name)
 }
 
 func NewSagaRepository() *sagaRepository {

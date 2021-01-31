@@ -15,7 +15,9 @@ func (svc *sagaPersistingService) Persist(ctx context.Context, sg *dto.SagaCreat
 		if err == nil {
 			_ = tx.Commit()
 		} else {
-			_ = tx.Rollback()
+			if tx != nil {
+				_ = tx.Rollback()
+			}
 		}
 	}()
 
