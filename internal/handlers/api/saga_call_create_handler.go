@@ -3,7 +3,6 @@ package api
 import (
 	"bytes"
 	"encoding/json"
-	"fmt"
 	"io/ioutil"
 	"net/http"
 
@@ -16,13 +15,9 @@ func (h *sagaCallCreateHandler) ServeHTTP(w http.ResponseWriter, r *http.Request
 	var err error
 	defer func() {
 		if err == nil {
-			w.WriteHeader(http.StatusOK)
-			w.Header().Set("Content-Type", "application/json")
-			_, _ = w.Write([]byte(`{"status": "ok"}`))
+			SuccessResponse(w, http.StatusOK)
 		} else {
-			w.WriteHeader(http.StatusBadRequest)
-			w.Header().Set("Content-Type", "application/json")
-			_, _ = w.Write([]byte(fmt.Sprintf(`{"status": "failed", "error": "%s"}`, err)))
+			FailureResponse(w, http.StatusBadRequest, err)
 		}
 	}()
 
