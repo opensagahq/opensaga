@@ -3,6 +3,9 @@ package main
 import (
 	"net/http"
 
+	"github.com/hashicorp/go-uuid"
+	"github.com/tidwall/gjson"
+
 	"opensaga/internal/database"
 	"opensaga/internal/handlers/api"
 	"opensaga/internal/handlers/healthz"
@@ -16,6 +19,17 @@ func main() {
 	sagaRepository := repositories.NewSagaRepository()
 	sagaStepRepository := repositories.NewSagaStepRepository()
 	sagaCallRepository := repositories.NewSagaCallRepository()
+	sagaCallStepRepository := repositories.NewSagaCallStepRepository()
+
+	uuidGenerationFunc := func() string {
+		u, _ := uuid.GenerateUUID()
+
+		return u
+	}
+
+	payloadExtractionFunc := func(content, path string) string {
+		return gjson.Get(content, path).String()
+	}
 
 	sagaPersistingService := services.NewSagaPersistingService(services.SagaPersistingServiceCfg{
 		SagaSaver:     sagaRepository,
@@ -23,9 +37,13 @@ func main() {
 		DB:            db,
 	})
 	sagaCallPersistingService := services.NewSagaCallPersistingService(services.SagaCallPersistingServiceCfg{
-		SagaIDFinder:  sagaRepository,
-		SagaCallSaver: sagaCallRepository,
-		DB:            db,
+		SagaIDFinder:          sagaRepository,
+		SagaCallSaver:         sagaCallRepository,
+		SagaStepFinder:        sagaStepRepository,
+		SagaCallStepEnqueuer:  sagaCallStepRepository,
+		UUIDGenerationFunc:    uuidGenerationFunc,
+		PayloadExtractionFunc: payloadExtractionFunc,
+		DB:                    db,
 	})
 
 	healthzHandler := healthz.New()

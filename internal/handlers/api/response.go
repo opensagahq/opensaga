@@ -15,10 +15,10 @@ func SuccessResponse(w http.ResponseWriter, httpStatus int) {
 func FailureResponse(w http.ResponseWriter, httpStatus int, err error) {
 	body, _ := json.Marshal(struct {
 		Status string `json:"status"`
-		Error  error  `json:"error"`
+		Error  string `json:"error"`
 	}{
 		Status: "failure",
-		Error:  err,
+		Error:  err.Error(),
 	})
 
 	w.WriteHeader(httpStatus)

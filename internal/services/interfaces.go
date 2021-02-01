@@ -20,3 +20,11 @@ type SagaIDFinder interface {
 type SagaCallSaver interface {
 	SaveStmt(*SagaCall) *Stmt
 }
+
+type SagaStepFinder interface {
+	FindIDAndNameBySagaIDStmt(sagaID string) *Stmt
+}
+
+type SagaCallStepEnqueuer interface {
+	EnqueueStmt(sagaCallStep *SagaCallStep) *Stmt
+}

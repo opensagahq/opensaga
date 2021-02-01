@@ -32,8 +32,9 @@ type SagaStep struct {
 	Endpoint string `json:"endpoint"`
 }
 
-func NewSagaCall(idempotencyKey, sagaID, content string) *SagaCall {
+func NewSagaCall(ID, idempotencyKey, sagaID, content string) *SagaCall {
 	return &SagaCall{
+		ID:             ID,
 		IdempotencyKey: idempotencyKey,
 		SagaID:         sagaID,
 		Content:        content,
@@ -41,7 +42,22 @@ func NewSagaCall(idempotencyKey, sagaID, content string) *SagaCall {
 }
 
 type SagaCall struct {
+	ID             string
 	IdempotencyKey string `json:"idempotency_key"`
 	SagaID         string `json:"saga_id"`
 	Content        string `json:"content"`
+}
+
+func NewUnenqueuedSagaCallStep(sagaStepID, sagaCallID, payload string) *SagaCallStep {
+	return &SagaCallStep{
+		SagaStepID: sagaStepID,
+		SagaCallID: sagaCallID,
+		Payload:    payload,
+	}
+}
+
+type SagaCallStep struct {
+	SagaStepID string
+	SagaCallID string
+	Payload    string
 }
