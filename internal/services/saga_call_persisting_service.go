@@ -44,7 +44,7 @@ func (svc *sagaCallPersistingService) Persist(ctx context.Context, sc *dto.SagaC
 		return
 	}
 
-	stmt = svc.sagaStepFinder.FindIDAndNameBySagaIDStmt(sagaID)
+	stmt = svc.sagaStepFinder.FindIDAndNameOfInitialStepBySagaIDStmt(sagaID)
 	var sagaStepID, sagaStepName string
 	err = tx.QueryRowContext(ctx, stmt.Query(), stmt.Args()...).Scan(&sagaStepID, &sagaStepName)
 	if err != nil {

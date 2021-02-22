@@ -19,7 +19,7 @@ func (r *sagaStepRepository) SaveStmt(sagaStep *entities.SagaStep) *Stmt {
 	)
 }
 
-func (r *sagaStepRepository) FindIDAndNameBySagaIDStmt(sagaID string) *Stmt {
+func (r *sagaStepRepository) FindIDAndNameOfInitialStepBySagaIDStmt(sagaID string) *Stmt {
 	return NewStmt(`select "id", "name" from "opensaga"."saga_step" where "saga_id" = $1 and "is_initial"`, sagaID)
 }
 

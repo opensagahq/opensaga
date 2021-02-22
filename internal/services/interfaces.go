@@ -22,7 +22,7 @@ type SagaCallSaver interface {
 }
 
 type SagaStepFinder interface {
-	FindIDAndNameBySagaIDStmt(sagaID string) *Stmt
+	FindIDAndNameOfInitialStepBySagaIDStmt(sagaID string) *Stmt
 }
 
 type SagaCallStepEnqueuer interface {
